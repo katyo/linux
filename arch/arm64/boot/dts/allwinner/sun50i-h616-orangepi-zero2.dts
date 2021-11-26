@@ -274,3 +274,62 @@
 	usb1_vbus-supply = <&reg_usb1_vbus>;
 	status = "okay";
 };
+
+&i2c3 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&i2c3_ph_pins>;
+	status = "okay";
+};
+
+&ir {
+	pinctrl-names = "default";
+	pinctrl-0 = <&ir_rx_pin>;
+	status = "okay";
+};
+
+&spi1 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "okay";
+
+	spidev@1 {
+		compatible = "spidev";
+		status = "okay";
+		reg = <0>;
+		spi-max-frequency = <1000000>;
+	};
+};
+
+&codec {
+        allwinner,audio-routing =
+                "Line Out", "LINEOUT";
+        status = "okay";
+};
+
+&ahub_codec {
+	status = "okay";
+};
+
+&ahub_cpudai0 {
+	status = "okay";
+};
+
+&ahub_cpudai1 {
+	status = "okay";
+};
+
+&ahub_cpudai2 {
+	status = "okay";
+};
+
+&sndahub {
+	status = "okay";
+};
+
+&ahub_i2s1 {
+	status = "okay";
+};
+
+&hdmi_audio {
+	status = "okay";
+};
