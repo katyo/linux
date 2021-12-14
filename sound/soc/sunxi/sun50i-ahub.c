@@ -486,7 +486,7 @@ static const struct snd_soc_dapm_route sunxi_ahub_codec_dapm_routes[] = {
 	{"DAM1Chan0 Src Select", "I2S3_TXDIF", "I2S3 DAC"},
 	{"DAM1Chan1 Src Select", "I2S3_TXDIF", "I2S3 DAC"},
 	{"DAM1Chan2 Src Select", "I2S3_TXDIF", "I2S3 DAC"},
-	
+
 	/* DAM0 Audio Mixer output route */
 	{"APBIF0 Src Select", "DAM0_TXDIF", "DAM0 Mixer"},
 	{"APBIF1 Src Select", "DAM0_TXDIF", "DAM0 Mixer"},
@@ -878,7 +878,7 @@ static struct snd_soc_dai_driver sunxi_ahub_codec_dais[] = {
 static int sunxi_ahub_codec_probe(struct snd_soc_component *component)
 {
 	struct snd_soc_dapm_context *dapm = snd_soc_component_get_dapm(component);
-	
+
 	snd_soc_dapm_new_controls(dapm, sunxi_ahub_codec_dapm_widgets,
 					ARRAY_SIZE(sunxi_ahub_codec_dapm_widgets));
 	snd_soc_dapm_add_routes(dapm, sunxi_ahub_codec_dapm_routes,
@@ -900,6 +900,14 @@ static int sunxi_ahub_codec_suspend(struct snd_soc_component *component)
 	return 0;
 }
 
+static sunxi_ahub_cpudai_init_func *sunxi_ahub_cpudai_init = NULL;
+
+void sunxi_ahub_set_cpudai_init(sunxi_ahub_cpudai_init_func *init_func)
+{
+	sunxi_ahub_cpudai_init = init_func;
+}
+EXPORT_SYMBOL_GPL(sunxi_ahub_set_cpudai_init);
+
 static int sunxi_ahub_codec_resume(struct snd_soc_component *component)
 {
 	struct sunxi_ahub_priv *sunxi_ahub = snd_soc_component_get_drvdata(component);
@@ -914,7 +922,9 @@ static int sunxi_ahub_codec_resume(struct snd_soc_component *component)
 	}
 
 	sunxi_ahub_codec_init(component);
-	//sunxi_ahub_cpudai_init();
+	if (sunxi_ahub_cpudai_init != NULL) {
+		sunxi_ahub_cpudai_init();
+	}
 
 	return 0;
 }
@@ -939,7 +949,7 @@ static int sunxi_ahub_dev_probe(struct platform_device *pdev)
 		dev_err(&pdev->dev, "Failed to get the APB clock\n");
 		return PTR_ERR(sunxi_ahub->clk_apb);
 	}
-	
+
 	sunxi_ahub->clk_module = devm_clk_get(&pdev->dev, "audio-codec-1x");
 	if (IS_ERR(sunxi_ahub->clk_module)) {
 		dev_err(&pdev->dev, "Failed to get the codec module clock\n");
@@ -967,7 +977,7 @@ static int sunxi_ahub_dev_probe(struct platform_device *pdev)
 	        dev_err(&pdev->dev, "Failed to enable the ahdio hub clock\n");
 	        return -EINVAL;
 	}
-	
+
 	sunxi_ahub->rst = devm_reset_control_get_exclusive(&pdev->dev, NULL);
 	if (IS_ERR(sunxi_ahub->rst)) {
 	        dev_err(&pdev->dev, "Failed to get reset control\n");
