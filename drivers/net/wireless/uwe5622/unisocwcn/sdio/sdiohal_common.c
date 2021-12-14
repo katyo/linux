@@ -651,8 +651,8 @@ int sdiohal_tx_list_denq(struct sdiohal_list_t *data_list)
 	struct mutex *chn_callback = p_data->callback_lock;
 	struct mchn_ops_t *sdiohal_ops;
 
-	struct timespec tm_begin, tm_end;
-	static long time_total_ns;
+	ktime_t tm_begin, tm_end;
+	static s64 time_total_ns;
 	static int times_count;
 
 	sdiohal_tx_pop_assignment(data_list);
@@ -675,7 +675,7 @@ int sdiohal_tx_list_denq(struct sdiohal_list_t *data_list)
 			continue;
 		}
 
-		getnstimeofday(&tm_begin);
+		tm_begin = ktime_get();
 
 		sdiohal_callback_lock(&chn_callback[channel]);
 		sdiohal_ops = chn_ops(channel);
@@ -711,12 +711,12 @@ int sdiohal_tx_list_denq(struct sdiohal_list_t *data_list)
 		tx_list->node_num = 0;
 		sdiohal_callback_unlock(&chn_callback[channel]);
 
-		getnstimeofday(&tm_end);
-		time_total_ns += timespec_to_ns(&tm_end)
-			- timespec_to_ns(&tm_begin);
+		tm_end = ktime_get();
+		time_total_ns += ktime_to_ns(ktime_sub(tm_end, tm_begin));
 		times_count++;
+
 		if (!(times_count % PERFORMANCE_COUNT)) {
-			sdiohal_pr_perf("tx pop callback,avg time:%ld\n",
+			sdiohal_pr_perf("tx pop callback,avg time:%lld\n",
 					(time_total_ns / PERFORMANCE_COUNT));
 			time_total_ns = 0;
 			times_count = 0;
@@ -735,8 +735,8 @@ int sdiohal_rx_list_dispatch(void)
 	struct mutex *chn_callback = p_data->callback_lock;
 	struct mchn_ops_t *sdiohal_ops;
 
-	struct timespec tm_begin, tm_end;
-	static long time_total_ns;
+	ktime_t tm_begin, tm_end;
+	static s64 time_total_ns;
 	static int times_count;
 
 	if (unlikely(p_data->flag_init != true))
@@ -760,7 +760,7 @@ int sdiohal_rx_list_dispatch(void)
 			continue;
 		}
 
-		getnstimeofday(&tm_begin);
+		tm_begin = ktime_get();
 
 		sdiohal_callback_lock(&chn_callback[channel]);
 		sdiohal_ops = chn_ops(channel);
@@ -801,12 +801,13 @@ int sdiohal_rx_list_dispatch(void)
 		rx_list->node_num = 0;
 		sdiohal_callback_unlock(&chn_callback[channel]);
 
-		getnstimeofday(&tm_end);
-		time_total_ns += timespec_to_ns(&tm_end)
-			- timespec_to_ns(&tm_begin);
+		tm_end = ktime_get();
+
+		time_total_ns += ktime_to_ns(ktime_sub(tm_end, tm_begin));
 		times_count++;
+
 		if (!(times_count % PERFORMANCE_COUNT)) {
-			sdiohal_pr_perf("rx pop callback,avg time:%ld\n",
+			sdiohal_pr_perf("rx pop callback,avg time:%lld\n",
 					(time_total_ns / PERFORMANCE_COUNT));
 			time_total_ns = 0;
 			times_count = 0;
@@ -1173,13 +1174,13 @@ int sdiohal_list_push(int channel, struct mbuf_t *head,
 		      struct mbuf_t *tail, int num)
 {
 	struct sdiohal_data_t *p_data = sdiohal_get_data();
-	struct timespec tm_begin, tm_end;
-	static long time_total_ns;
+	ktime_t tm_begin, tm_end;
+	static s64 time_total_ns;
 	static int times_count;
 	struct mbuf_t *mbuf_node;
 	int i;
 
-	getnstimeofday(&tm_begin);
+	tm_begin = ktime_get();
 
 	if (unlikely(p_data->flag_init != true))
 		return -ENODEV;
@@ -1235,21 +1236,24 @@ int sdiohal_list_push(int channel, struct mbuf_t *head,
 
 		sdiohal_tx_list_enq(channel, head, tail, num);
 
-		getnstimeofday(&tm_end);
-		time_total_ns += timespec_to_ns(&tm_end)
-			- timespec_to_ns(&tm_begin);
+		tm_end = ktime_get();
+
+		time_total_ns += ktime_to_ns(ktime_sub(tm_end, tm_begin));
 		times_count++;
+
 		if (!(times_count % PERFORMANCE_COUNT)) {
-			sdiohal_pr_perf("tx avg time:%ld\n",
+			sdiohal_pr_perf("tx avg time:%lld\n",
 					(time_total_ns / PERFORMANCE_COUNT));
 			time_total_ns = 0;
 			times_count = 0;
 		}
-		getnstimeofday(&p_data->tm_begin_sch);
+
+		p_data->tm_begin_sch = ktime_get();
 
 		sdiohal_tx_up();
-	} else
+	} else {
 		sdiohal_rx_list_free(head, tail, num);
+	}
 
 	return 0;
 }
