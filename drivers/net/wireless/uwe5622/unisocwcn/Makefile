@@ -118,10 +118,10 @@ ccflags-y += -DCONFIG_WCN_BOOT
 ccflags-y += -DCONFIG_WCN_UTILS
 
 #### include path ######
-ccflags-y += -I$(src)/../tty-sdio
-ccflags-y += -I$(src)/include/
-ccflags-y += -I$(src)/platform/
-ccflags-y += -I$(src)/platform/rf/
+ccflags-y += -I $(srctree)/$(src)/../tty-sdio
+ccflags-y += -I $(srctree)/$(src)/include/
+ccflags-y += -I $(srctree)/$(src)/platform/
+ccflags-y += -I $(srctree)/$(src)/platform/rf/
 
 #### add cflag for Customer ######
 ### ---------- Hisilicon start ---------- ###
@@ -384,7 +384,7 @@ $(MODULE_NAME)-$(CONFIG_WCN_SDIO) += \
 
 # wcn module bind verify
 ifeq ($(CONFIG_AW_BIND_VERIFY),y)
-$(obj)/platform/wcn_bind_helper.o: $(src)/platform/wcn_bind_helper.c
+$(obj)/platform/wcn_bind_helper.o: $(srctree)/$(src)/platform/wcn_bind_helper.c
 	@$(HOSTCC) $^ -o $@
 $(obj)/platform/wcn_bind_verify.o: $(obj)/platform/wcn_bind_helper.o
 	@echo " " > $(shell dirname $@)/.$(shell basename $@).cmd
@@ -396,7 +396,7 @@ KDIR ?= $(ANDROID_PRODUCT_OUT)/obj/KERNEL_OBJ
 ARCH ?= arm
 CROSS_COMPILE ?= arm-histbv310-linux-
 
-EXTRA_CFLAGS += -I$(src)/include -D__linux__
+EXTRA_CFLAGS += -I $(srctree)/$(src)/include -D__linux__
 
 all: $(all_dependencies)
 
