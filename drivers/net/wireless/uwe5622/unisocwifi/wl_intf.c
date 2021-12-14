@@ -132,7 +132,7 @@ void sprdwl_clear_stats(struct sprdwl_intf *intf)
 void sprdwl_get_tx_avg_time(struct sprdwl_intf *intf,
 			    unsigned long tx_start_time)
 {
-	struct timespec tx_end;
+	struct timespec64 tx_end;
 
 	getnstimeofday(&tx_end);
 	intf->stats.tx_cost_time +=
@@ -1333,7 +1333,7 @@ int sprdwl_suspend_resume_handle(int chn, int mode)
 	struct sprdwl_tx_msg *tx_msg = (struct sprdwl_tx_msg *)intf->sprdwl_tx;
 	int ret;
 	struct sprdwl_vif *vif;
-	struct timespec time;
+	struct timespec64 time;
 	enum sprdwl_mode sprdwl_mode = SPRDWL_MODE_STATION;
 	u8 mode_found = 0;
 
