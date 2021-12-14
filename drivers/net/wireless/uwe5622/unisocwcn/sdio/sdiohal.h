@@ -5,14 +5,7 @@
 #include <linux/device.h>
 #include <linux/scatterlist.h>
 #include <linux/slab.h>
-#ifndef timespec
-#define timespec timespec64
-#define timespec_to_ns timespec64_to_ns
-#define getnstimeofday ktime_get_real_ts64
-#define timeval __kernel_old_timeval
-#define rtc_time_to_tm rtc_time64_to_tm
-#define timeval_to_ns ktime_to_ns
-#endif
+#include <linux/ktime.h>
 
 #include <linux/version.h>
 #if KERNEL_VERSION(4, 14, 0) <= LINUX_VERSION_CODE
@@ -364,10 +357,10 @@ struct sdiohal_data_t {
 	char *dtbs_buf;
 
 	/* for performance statics */
-	struct timespec tm_begin_sch;
-	struct timespec tm_end_sch;
-	struct timespec tm_begin_irq;
-	struct timespec tm_end_irq;
+	ktime_t tm_begin_sch;
+	ktime_t tm_end_sch;
+	ktime_t tm_begin_irq;
+	ktime_t tm_end_irq;
 
 	struct wakeup_source *scan_ws;
 	struct completion scan_done;
