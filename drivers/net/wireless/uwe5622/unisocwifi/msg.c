@@ -63,7 +63,7 @@ void sprdwl_msg_deinit(struct sprdwl_msg_list *list)
 {
 	struct sprdwl_msg_buf *msg_buf;
 	struct sprdwl_msg_buf *pos;
-	struct timespec txmsgftime1, txmsgftime2;
+	struct timespec64 txmsgftime1, txmsgftime2;
 
 	atomic_add(SPRDWL_MSG_EXIT_VAL, &list->ref);
 	if (atomic_read(&list->ref) > SPRDWL_MSG_EXIT_VAL)

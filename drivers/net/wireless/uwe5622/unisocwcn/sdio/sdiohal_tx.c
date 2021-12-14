@@ -136,8 +136,8 @@ int sdiohal_tx_thread(void *data)
 	struct sdiohal_data_t *p_data = sdiohal_get_data();
 	struct sdiohal_list_t data_list;
 	struct sched_param param;
-	struct timespec tm_begin, tm_end;
-	static long time_total_ns;
+	ktime_t tm_begin, tm_end;
+	static s64 time_total_ns;
 	static int times_count;
 
 	param.sched_priority = SDIO_TX_TASK_PRIO;
@@ -154,10 +154,11 @@ int sdiohal_tx_thread(void *data)
 			continue;
 		}
 
-		getnstimeofday(&p_data->tm_end_sch);
-		sdiohal_pr_perf("tx sch time:%ld\n",
-			(long)(timespec_to_ns(&p_data->tm_end_sch)
-			- timespec_to_ns(&p_data->tm_begin_sch)));
+		p_data->tm_end_sch = ktime_get();
+
+		sdiohal_pr_perf("tx sch time:%lld\n",
+			ktime_to_ns(ktime_sub(p_data->tm_end_sch,
+														p_data->tm_begin_sch)));
 		sdiohal_lock_tx_ws();
 		sdiohal_resume_wait();
 
@@ -165,7 +166,7 @@ int sdiohal_tx_thread(void *data)
 		sdiohal_cp_tx_wakeup(PACKER_TX);
 
 		while (!sdiohal_is_tx_list_empty()) {
-			getnstimeofday(&tm_begin);
+			tm_begin = ktime_get();
 
 			sdiohal_tx_find_data_list(&data_list);
 			if (p_data->adma_tx_enable) {
@@ -174,12 +175,12 @@ int sdiohal_tx_thread(void *data)
 			} else
 				sdiohal_tx_data_list_send(&data_list, true);
 
-			getnstimeofday(&tm_end);
-			time_total_ns += timespec_to_ns(&tm_end)
-				- timespec_to_ns(&tm_begin);
+			tm_end = ktime_get();
+			time_total_ns += ktime_to_ns(ktime_sub(tm_end, tm_begin));
 			times_count++;
+
 			if (!(times_count % PERFORMANCE_COUNT)) {
-				sdiohal_pr_perf("tx list avg time:%ld\n",
+				sdiohal_pr_perf("tx list avg time:%lld\n",
 					(time_total_ns / PERFORMANCE_COUNT));
 				time_total_ns = 0;
 				times_count = 0;
@@ -192,4 +193,3 @@ int sdiohal_tx_thread(void *data)
 
 	return 0;
 }
-
