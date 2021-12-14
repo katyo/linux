@@ -200,8 +200,8 @@ int sdiohal_rx_thread(void *data)
 	unsigned int valid_len = 0;
 	static char *rx_buf;
 	struct sdiohal_list_t *data_list = NULL;
-	struct timespec tm_begin, tm_end;
-	static long time_total_ns;
+	ktime_t tm_begin, tm_end;
+	static s64 time_total_ns;
 	static int times_count;
 
 	param.sched_priority = SDIO_RX_TASK_PRIO;
@@ -223,16 +223,17 @@ int sdiohal_rx_thread(void *data)
 			continue;
 		}
 
-		getnstimeofday(&p_data->tm_end_irq);
-		sdiohal_pr_perf("rx sch time:%ld\n",
-				(long)(timespec_to_ns(&p_data->tm_end_irq)
-				- timespec_to_ns(&p_data->tm_begin_irq)));
+		p_data->tm_end_irq = ktime_get();
+
+		sdiohal_pr_perf("rx sch time:%lld\n",
+				ktime_to_ns(ktime_sub(p_data->tm_end_irq,
+															p_data->tm_begin_irq)));
 
 		sdiohal_resume_wait();
 		sdiohal_cp_rx_wakeup(PACKER_RX);
 
 read_again:
-		getnstimeofday(&tm_begin);
+		tm_begin = ktime_get();
 
 		if (p_data->adma_rx_enable) {
 			/* read len is packet num */
@@ -304,12 +305,13 @@ read_again:
 		}
 
 submit_list:
-		getnstimeofday(&tm_end);
-		time_total_ns += timespec_to_ns(&tm_end)
-			- timespec_to_ns(&tm_begin);
+		tm_end = ktime_get();
+
+		time_total_ns += ktime_to_ns(ktime_sub(tm_end, tm_begin));
 		times_count++;
+
 		if (!(times_count % PERFORMANCE_COUNT)) {
-			sdiohal_pr_perf("rx list avg time:%ld\n",
+			sdiohal_pr_perf("rx list avg time:%lld\n",
 					(time_total_ns / PERFORMANCE_COUNT));
 			time_total_ns = 0;
 			times_count = 0;
