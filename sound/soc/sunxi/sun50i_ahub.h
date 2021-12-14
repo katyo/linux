@@ -293,7 +293,9 @@ extern struct regmap *sunxi_ahub_regmap_init(struct platform_device *pdev);
 extern unsigned int sunxi_ahub_read(unsigned int reg);
 extern int sunxi_ahub_update_bits(unsigned int reg, unsigned int mask,
 				unsigned int val);
-extern int sunxi_ahub_cpudai_init(void);
+
+typedef int sunxi_ahub_cpudai_init_func(void);
+extern void sunxi_ahub_set_cpudai_init(sunxi_ahub_cpudai_init_func *init_func);
 
 /* used for sunxi netlink to auto open others card */
 //extern void sunxi_netlink_printd(const char *fmt, ...);
