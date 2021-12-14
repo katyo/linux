@@ -40,15 +40,13 @@ static int startup_playback_cnt;
 static int startup_capture_cnt;
 static int karaoke_cnt;
 
-int sunxi_ahub_cpudai_init(void)
+static int sunxi_ahub_cpudai_init(void)
 {
 	startup_playback_cnt = 0;
 	startup_capture_cnt = 0;
 	karaoke_cnt = 0;
 	return 0;
 }
-EXPORT_SYMBOL_GPL(sunxi_ahub_cpudai_init);
-
 
 static int sunxi_ahub_i2s_playback_route_enable(
 		struct sunxi_ahub_cpudai_priv *sunxi_ahub_cpudai)
@@ -126,7 +124,7 @@ no_karaook_handle:
 		break;
 	}
 	sunxi_ahub_cpudai->karaoke_mode = 0;
-	
+
 	return 0;
 }
 
@@ -194,11 +192,11 @@ static int sunxi_ahub_i2s_capture_route_enable(
 		sunxi_ahub_update_bits(SUNXI_AHUB_GAT,
 			(1<<I2S0_GAT), (1<<I2S0_GAT));
 		sunxi_ahub_update_bits(SUNXI_AHUB_I2S_CTL(0),
-			(1<<I2S_CTL_RXEN), (1<<I2S_CTL_RXEN));		
+			(1<<I2S_CTL_RXEN), (1<<I2S_CTL_RXEN));
 		sunxi_ahub_update_bits(SUNXI_AHUB_I2S_CTL(0),
 				(1 << I2S_CTL_SDI0_EN), ( 1<< I2S_CTL_SDI0_EN));
 		/* add the delay to anti pop noise when it start capture */
-		mdelay(100);		
+		mdelay(100);
 	}
 
 	if (reg_val == (1 << i2s1_cap_bit)) {
@@ -253,7 +251,7 @@ static int sunxi_ahub_i2s_capture_route_disable(
 		SUNXI_AHUB_APBIF_RXFIFO_CONT(sunxi_ahub_cpudai->id));
 	if (reg_val == (1<<i2s0_cap_bit)) {
 		sunxi_ahub_update_bits(SUNXI_AHUB_I2S_CTL(0),
-			(1<<I2S_CTL_RXEN), (0<<I2S_CTL_RXEN));		
+			(1<<I2S_CTL_RXEN), (0<<I2S_CTL_RXEN));
 		sunxi_ahub_update_bits(SUNXI_AHUB_I2S_CTL(0),
 				(1<<I2S_CTL_SDI0_EN), (0<<I2S_CTL_SDI0_EN));
 	}
@@ -276,7 +274,7 @@ static int sunxi_ahub_i2s_capture_route_disable(
 		sunxi_ahub_update_bits(SUNXI_AHUB_I2S_CTL(3),
 				(1<<I2S_CTL_SDI0_EN), (0<<I2S_CTL_SDI0_EN));
 	}
-	
+
 	return 0;
 }
 
@@ -408,7 +406,7 @@ static struct snd_soc_dai_driver sunxi_ahub_cpudai_dai = {
 static const struct snd_soc_component_driver sunxi_ahub_cpudai_component = {
 	.name		= DRV_NAME,
 };
-	
+
 static const struct of_device_id sunxi_ahub_cpudai_of_match[] = {
 	{ .compatible = "allwinner,sunxi-ahub-cpudai", },
 	{},
@@ -416,7 +414,7 @@ static const struct of_device_id sunxi_ahub_cpudai_of_match[] = {
 
 static int  sunxi_ahub_cpudai_dev_probe(struct platform_device *pdev)
 {
-	struct resource res;	
+	struct resource res;
 
 	struct sunxi_ahub_cpudai_priv *sunxi_ahub_cpudai;
 	struct device_node *np = pdev->dev.of_node;
@@ -430,7 +428,7 @@ static int  sunxi_ahub_cpudai_dev_probe(struct platform_device *pdev)
 		ret = -ENOMEM;
 		goto err_node_put;
 	}
-	
+
 	dev_set_drvdata(&pdev->dev, sunxi_ahub_cpudai);
 
 	ret = of_property_read_u32(np, "id", &temp_val);
@@ -481,6 +479,8 @@ static int  sunxi_ahub_cpudai_dev_probe(struct platform_device *pdev)
 		goto err_unregister_component;
 	}
 
+	sunxi_ahub_set_cpudai_init(sunxi_ahub_cpudai_init);
+
 	return 0;
 
 err_unregister_component:
@@ -497,6 +497,8 @@ static int __exit sunxi_ahub_cpudai_dev_remove(struct platform_device *pdev)
 {
 	struct sunxi_ahub_cpudai_priv *sunxi_ahub_cpudai =
 					dev_get_drvdata(&pdev->dev);
+
+	sunxi_ahub_set_cpudai_init(NULL);
 
 	snd_soc_unregister_component(&pdev->dev);
 	devm_kfree(&pdev->dev, sunxi_ahub_cpudai);
