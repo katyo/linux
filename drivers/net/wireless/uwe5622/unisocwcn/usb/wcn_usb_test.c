@@ -240,8 +240,8 @@ static const struct file_operations wcn_usb_channel_fops = {
 int calculate_throughput(int channel_id, struct mbuf_t *head,
 		struct mbuf_t *tail, int num)
 {
-	static struct timespec tm_begin;
-	struct timespec tm_end;
+	static struct timespec64 tm_begin;
+	struct timespec64 tm_end;
 	static int time_count;
 	unsigned long time_total_ns;
 	struct mbuf_t *mbuf;
