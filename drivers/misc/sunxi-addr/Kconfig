@@ -1,0 +1,7 @@
+config SUNXI_ADDR_MGMT
+	tristate "Allwinner Network MAC Addess Manager"
+	depends on BT || ETHERNET || WLAN
+	depends on NVMEM_SUNXI_SID
+	select CRYPTO_LIB_SHA256
+	help
+	  Allwinner network MAC address management
