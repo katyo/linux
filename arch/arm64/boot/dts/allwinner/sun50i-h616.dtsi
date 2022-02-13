@@ -823,9 +823,11 @@
 			interrupts = <GIC_SPI 26 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&ccu CLK_BUS_OHCI0>,
 				 <&ccu CLK_BUS_EHCI0>,
-				 <&ccu CLK_USB_OHCI0>;
+				 <&ccu CLK_USB_OHCI0>,
+				 <&ccu CLK_USB_PHY2>;
 			resets = <&ccu RST_BUS_OHCI0>,
-				 <&ccu RST_BUS_EHCI0>;
+				 <&ccu RST_BUS_EHCI0>,
+				 <&ccu RST_USB_PHY2>;
 			phys = <&usbphy 0>;
 			phy-names = "usb";
 			status = "disabled";
@@ -837,8 +839,10 @@
 			reg = <0x05101400 0x100>;
 			interrupts = <GIC_SPI 27 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&ccu CLK_BUS_OHCI0>,
-				 <&ccu CLK_USB_OHCI0>;
-			resets = <&ccu RST_BUS_OHCI0>;
+				 <&ccu CLK_USB_OHCI0>,
+				 <&ccu CLK_USB_PHY2>;
+			resets = <&ccu RST_BUS_OHCI0>,
+				 <&ccu RST_USB_PHY2>;
 			phys = <&usbphy 0>;
 			phy-names = "usb";
 			status = "disabled";
@@ -851,9 +855,11 @@
 			interrupts = <GIC_SPI 28 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&ccu CLK_BUS_OHCI1>,
 				 <&ccu CLK_BUS_EHCI1>,
-				 <&ccu CLK_USB_OHCI1>;
+				 <&ccu CLK_USB_OHCI1>,
+				 <&ccu CLK_USB_PHY2>;
 			resets = <&ccu RST_BUS_OHCI1>,
-				 <&ccu RST_BUS_EHCI1>;
+				 <&ccu RST_BUS_EHCI1>,
+				 <&ccu RST_USB_PHY2>;
 			phys = <&usbphy 1>;
 			phy-names = "usb";
 			status = "disabled";
@@ -865,8 +871,10 @@
 			reg = <0x05200400 0x100>;
 			interrupts = <GIC_SPI 29 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&ccu CLK_BUS_OHCI1>,
-				 <&ccu CLK_USB_OHCI1>;
-			resets = <&ccu RST_BUS_OHCI1>;
+				 <&ccu CLK_USB_OHCI1>,
+				 <&ccu CLK_USB_PHY2>;
+			resets = <&ccu RST_BUS_OHCI1>,
+				 <&ccu RST_USB_PHY2>;
 			phys = <&usbphy 1>;
 			phy-names = "usb";
 			status = "disabled";
@@ -907,9 +915,11 @@
 			interrupts = <GIC_SPI 32 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&ccu CLK_BUS_OHCI3>,
 				 <&ccu CLK_BUS_EHCI3>,
-				 <&ccu CLK_USB_OHCI3>;
+				 <&ccu CLK_USB_OHCI3>,
+				 <&ccu CLK_USB_PHY2>;
 			resets = <&ccu RST_BUS_OHCI3>,
-				 <&ccu RST_BUS_EHCI3>;
+				 <&ccu RST_BUS_EHCI3>,
+				 <&ccu RST_USB_PHY2>;
 			phys = <&usbphy 3>;
 			phy-names = "usb";
 			status = "disabled";
@@ -921,8 +931,10 @@
 			reg = <0x05311400 0x100>;
 			interrupts = <GIC_SPI 33 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&ccu CLK_BUS_OHCI3>,
-				 <&ccu CLK_USB_OHCI3>;
-			resets = <&ccu RST_BUS_OHCI3>;
+				 <&ccu CLK_USB_OHCI3>,
+				 <&ccu CLK_USB_PHY2>;
+			resets = <&ccu RST_BUS_OHCI3>,
+				 <&ccu RST_USB_PHY2>;
 			phys = <&usbphy 3>;
 			phy-names = "usb";
 			status = "disabled";
