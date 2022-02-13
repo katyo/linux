@@ -418,6 +418,7 @@
 			cap-sd-highspeed;
 			cap-mmc-highspeed;
 			mmc-ddr-3_3v;
+			mmc-ddr-1_8v;
 			cap-sdio-irq;
 			#address-cells = <1>;
 			#size-cells = <0>;
@@ -439,6 +440,7 @@
 			cap-sd-highspeed;
 			cap-mmc-highspeed;
 			mmc-ddr-3_3v;
+			mmc-ddr-1_8v;
 			cap-sdio-irq;
 			#address-cells = <1>;
 			#size-cells = <0>;
@@ -460,6 +462,7 @@
 			cap-sd-highspeed;
 			cap-mmc-highspeed;
 			mmc-ddr-3_3v;
+			mmc-ddr-1_8v;
 			cap-sdio-irq;
 			#address-cells = <1>;
 			#size-cells = <0>;
