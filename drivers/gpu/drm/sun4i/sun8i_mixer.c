@@ -489,8 +489,7 @@ static int sun8i_mixer_bind(struct device *dev, struct device *master,
 	}
 
 	if (mixer->cfg->de_type == sun8i_mixer_de33) {
-		res = platform_get_resource(pdev, IORESOURCE_MEM, 1);
-		regs = devm_ioremap_resource(dev, res);
+		regs = devm_platform_get_and_ioremap_resource(pdev, 1, NULL);
 		if (IS_ERR(regs))
 			return PTR_ERR(regs);
 
@@ -501,8 +500,7 @@ static int sun8i_mixer_bind(struct device *dev, struct device *master,
 			return PTR_ERR(mixer->top_regs);
 		}
 
-		res = platform_get_resource(pdev, IORESOURCE_MEM, 2);
-		regs = devm_ioremap_resource(dev, res);
+		regs = devm_platform_get_and_ioremap_resource(pdev, 2, NULL);
 		if (IS_ERR(regs))
 			return PTR_ERR(regs);
 
