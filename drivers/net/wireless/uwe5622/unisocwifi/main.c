@@ -1117,7 +1117,7 @@ static int sprdwl_get_mac_from_file(struct sprdwl_vif *vif, u8 *addr)
 
 	return 0;
 random_mac:
-	random_ether_addr(addr);
+	eth_random_addr(addr);
 	wl_warn("%s use random MAC address\n",
 			__func__);
 	/* initialize MAC addr with specific OUI */
@@ -1736,4 +1736,3 @@ MODULE_PARM_DESC(tcp_ack_drop_enable, "valid values: [0, 1]");
 #else
 const unsigned int tcp_ack_drop_enable;
 #endif
-
