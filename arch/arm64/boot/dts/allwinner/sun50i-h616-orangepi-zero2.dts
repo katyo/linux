@@ -169,6 +169,16 @@
 	non-removable;
 	mmc-ddr-1_8v;
 	status = "okay";
+
+	uwe-bsp {
+		compatible = "unisoc,uwe_bsp";
+		keep-power-on;
+		data-irq;
+		//adma-tx;
+		adma-rx;
+		//blksz-512;
+		status = "okay";
+	};
 };
 
 &ohci1 {
