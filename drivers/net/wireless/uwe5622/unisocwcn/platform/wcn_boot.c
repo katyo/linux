@@ -2346,8 +2346,67 @@ static int marlin_start_run(void)
 }
 
 #if IS_ENABLED(CONFIG_AW_BIND_VERIFY)
-extern int wcn_bind_verify_calculate_verify_data
-	(uint8_t *confuse_data, uint8_t *verify_data);
+#include <crypto/sha2.h>
+
+static void expand_seed(u8 *seed, u8 *out)
+{
+	unsigned char hash[64];
+	int i;
+
+	sha256(seed, 4, hash);
+
+	for (i = 0; i < 4; i++) {
+		memcpy(&out[i * 9], &hash[i * 8], 8);
+		out[i * 9 + 8] = seed[i];
+	}
+}
+
+static int wcn_bind_verify_calculate_verify_data(u8 *in, u8 *out)
+{
+	u8 seed[4], buf[36], a, b, c;
+	int i, n;
+
+	for (i = 0, n = 0; i < 4; i++) {
+		a = in[n++];
+		b = in[n++];
+		c = in[n++];
+		seed[i] = (a & b) ^ (a & c) ^ (b & c) ^ in[i + 12];
+	}
+
+	expand_seed(seed, buf);
+
+	for (i = 0, n = 0; i < 12; i++) {
+		a = buf[n++];
+		b = buf[n++];
+		c = buf[n++];
+		out[i] = (a & b) ^ (a & c) ^ (b & c);
+	}
+
+	for (i = 0, n = 0; i < 4; i++) {
+		a = out[n++];
+		b = out[n++];
+		c = out[n++];
+		seed[i] = (a & b) ^ (~a & c);
+	}
+
+	expand_seed(seed, buf);
+
+	for (i = 0, n = 0; i < 12; i++) {
+		a = buf[n++];
+		b = buf[n++];
+		c = buf[n++];
+		out[i] = (a & b) ^ (~a & c);
+	}
+
+	for (i = 0, n = 0; i < 4; i++) {
+		a = out[n++];
+		b = out[n++];
+		c = out[n++];
+		out[i + 12] = (a & b) ^ (a & c) ^ (b & c) ^ seed[i];
+	}
+
+	return 0;
+}
 
 static int marlin_bind_verify(void)
 {
@@ -2356,15 +2415,15 @@ static int marlin_bind_verify(void)
 
 	/*transform confuse data to verify data*/
 	memcpy(din, &marlin_dev->sync_f.bind_verify_data[0], 16);
-	WCN_INFO("%s confuse data: 0x%x%x%x%x%x%x%x%x"
-		 "%x%x%x%x%x%x%x%x\n", __func__,
+	WCN_INFO("%s confuse data: 0x%02x%02x%02x%02x%02x%02x%02x%02x"
+					 "%02x%02x%02x%02x%02x%02x%02x%02x\n", __func__,
 		 din[0], din[1], din[2], din[3],
 		 din[4], din[5], din[6], din[7],
 		 din[8], din[9], din[10], din[11],
 		 din[12], din[13], din[14], din[15]);
 	wcn_bind_verify_calculate_verify_data(din, dout);
-	WCN_INFO("%s verify data: 0x%x%x%x%x%x%x%x%x"
-		 "%x%x%x%x%x%x%x%x\n", __func__,
+	WCN_INFO("%s verify data: 0x%02x%02x%02x%02x%02x%02x%02x%02x"
+					 "%02x%02x%02x%02x%02x%02x%02x%02x\n", __func__,
 		 dout[0], dout[1], dout[2], dout[3],
 		 dout[4], dout[5], dout[6], dout[7],
 		 dout[8], dout[9], dout[10], dout[11],
@@ -2398,10 +2457,6 @@ static int check_cp_ready(void)
 {
 	int ret = 0;
 	int i = 0;
-
-#ifdef CONFIG_WCN_USB
-	return sprdwcn_check_cp_ready(SYNC_ADDR, 3000);
-#endif
 
 	do {
 		i++;
