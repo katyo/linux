@@ -70,7 +70,7 @@ static int btwrite_proc_show(struct seq_file *m, void *v)
 
 static int bluesleep_open_proc_btwrite(struct inode *inode, struct file *file)
 {
-	return single_open(file, btwrite_proc_show, PDE_DATA(inode));
+	return single_open(file, btwrite_proc_show, pde_data(inode));
 }
 
 static const struct proc_ops lpm_proc_btwrite_fops = {
