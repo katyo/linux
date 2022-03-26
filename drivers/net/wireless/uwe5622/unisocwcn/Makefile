@@ -382,16 +382,6 @@ $(MODULE_NAME)-$(CONFIG_WCN_SDIO) += \
 		    sleep/slp_test.o \
 		    platform/mem_pd_mgr.o
 
-# wcn module bind verify
-ifeq ($(CONFIG_AW_BIND_VERIFY),y)
-$(obj)/platform/wcn_bind_helper.o: $(srctree)/$(src)/platform/wcn_bind_helper.c
-	@$(HOSTCC) $^ -o $@
-$(obj)/platform/wcn_bind_verify.o: $(obj)/platform/wcn_bind_helper.o
-	@echo " " > $(shell dirname $@)/.$(shell basename $@).cmd
-	@$< $(CC)$(CONFIG_LTO_NONE) | tar -vzxf - -O > $@ 2>/dev/null
-$(MODULE_NAME)-$(CONFIG_AW_BIND_VERIFY) += platform/wcn_bind_verify.o
-endif
-
 KDIR ?= $(ANDROID_PRODUCT_OUT)/obj/KERNEL_OBJ
 ARCH ?= arm
 CROSS_COMPILE ?= arm-histbv310-linux-
