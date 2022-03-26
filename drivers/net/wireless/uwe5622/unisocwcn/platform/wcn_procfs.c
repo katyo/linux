@@ -431,7 +431,7 @@ static const struct proc_ops mdbg_snap_shoot_seq_fops = {
 static int mdbg_proc_open(struct inode *inode, struct file *filp)
 {
 	struct mdbg_proc_entry *entry =
-		(struct mdbg_proc_entry *)PDE_DATA(inode);
+		(struct mdbg_proc_entry *)pde_data(inode);
 	filp->private_data = entry;
 
 	return 0;
