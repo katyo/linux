@@ -477,7 +477,7 @@ static void mtty_flush_chars(struct tty_struct *tty)
 
 static unsigned int mtty_write_room(struct tty_struct *tty)
 {
-	return INT_MAX;
+	return UINT_MAX;
 }
 
 static const struct tty_operations mtty_ops = {

@@ -104,7 +104,7 @@ void bt_host_data_printf(void)
 		printk("%d-%d-%d %d:%d:%d.%06ld ", 1900 + data_dump->txtime_t[loop_count_j].rtc_t.tm_year,
 				1 + data_dump->txtime_t[loop_count_j].rtc_t.tm_mon, data_dump->txtime_t[loop_count_j].rtc_t.tm_mday,
 				data_dump->txtime_t[loop_count_j].rtc_t.tm_hour, data_dump->txtime_t[loop_count_j].rtc_t.tm_min,
-				data_dump->txtime_t[loop_count_j].rtc_t.tm_sec, data_dump->txtime_t[loop_count_j].tv.tv_nsec/1000);
+				data_dump->txtime_t[loop_count_j].rtc_t.tm_sec, data_dump->txtime_t[loop_count_j].tv.tv_nsec);
 		while (loop_count_i < BT_MAX_DUMP_DATA_LEN) {
 			printk("%02X ", data_dump->tx[loop_count_j][loop_count_i++]);
 		}
@@ -118,7 +118,7 @@ void bt_host_data_printf(void)
 		printk("%d-%d-%d %d:%d:%d.%06ld ", 1900 + data_dump->rxtime_t[loop_count_j].rtc_t.tm_year,
 				1 + data_dump->rxtime_t[loop_count_j].rtc_t.tm_mon, data_dump->rxtime_t[loop_count_j].rtc_t.tm_mday,
 				data_dump->rxtime_t[loop_count_j].rtc_t.tm_hour, data_dump->rxtime_t[loop_count_j].rtc_t.tm_min,
-				data_dump->rxtime_t[loop_count_j].rtc_t.tm_sec, data_dump->rxtime_t[loop_count_j].tv.tv_nsec/1000);
+				data_dump->rxtime_t[loop_count_j].rtc_t.tm_sec, data_dump->rxtime_t[loop_count_j].tv.tv_nsec);
 		while (loop_count_i < BT_MAX_DUMP_DATA_LEN) {
 			printk("%02X ", data_dump->rx[loop_count_j][loop_count_i++]);
 		}
