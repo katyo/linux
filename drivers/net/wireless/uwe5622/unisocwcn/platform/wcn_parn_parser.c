@@ -186,7 +186,7 @@ int parse_firmware_path(char *firmware_path)
 			continue;
 		}
 		memset(fstab_name, 0, sizeof(fstab_name));
-		strncpy(fstab_name, fstab_dir[loop], sizeof(fstab_dir[loop]));
+		strncpy(fstab_name, fstab_dir[loop], sizeof(fstab_name));
 		if (strlen(fstab_name) > 1)
 			fstab_name[strlen(fstab_name)] = '/';
 		iterate_dir(file1, &ctx);
@@ -207,4 +207,3 @@ int parse_firmware_path(char *firmware_path)
 
 	return ret;
 }
-
