@@ -82,19 +82,6 @@ endif
 
 MODULE_NAME := $(BSP_CHIP_ID)_bsp_$(WCN_HW_TYPE)
 
-ifneq ($(UNISOC_FW_PATH_CONFIG),)
-ccflags-y += -DCONFIG_CUSTOMIZE_UNISOC_FW_PATH=\"$(UNISOC_FW_PATH_CONFIG)\"
-endif
-ifneq ($(UNISOC_DBG_FILESIZE_CONFIG),)
-ccflags-y += -DCONFIG_CUSTOMIZE_UNISOC_DBG_FILESIZE=$(UNISOC_DBG_FILESIZE_CONFIG)
-endif
-ifneq ($(UNISOC_DBG_FILENUM_CONFIG),)
-ccflags-y += -DCONFIG_CUSTOMIZE_UNISOC_DBG_FILENUM=$(UNISOC_DBG_FILENUM_CONFIG)
-endif
-ifneq ($(UNISOC_DBG_PATH_CONFIG),)
-ccflags-y += -DCONFIG_CUSTOMIZE_UNISOC_DBG_PATH=\"$(UNISOC_DBG_PATH_CONFIG)\"
-endif
-
 #### add cflag ######
 ifeq ($(CONFIG_WCN_SDIO),y)
 ccflags-y += -DCONFIG_WCN_SDIO
@@ -366,28 +353,3 @@ $(MODULE_NAME)-$(CONFIG_WCN_SDIO) += \
 		    sleep/slp_sdio.o \
 		    sleep/slp_test.o \
 		    platform/mem_pd_mgr.o
-
-KDIR ?= $(ANDROID_PRODUCT_OUT)/obj/KERNEL_OBJ
-ARCH ?= arm
-CROSS_COMPILE ?= arm-histbv310-linux-
-
-EXTRA_CFLAGS += -I $(srctree)/$(src)/include -D__linux__
-
-all: $(all_dependencies)
-
-driver: $(driver_dependencies)
-	@echo Convert $(firmware_file) to $(firmware_target)
-	@$(BIN2HEX_TOOL) $(firmware_file)
-	@echo build driver
-	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -C $(KDIR) M=$(PWD) modules
-
-install:
-	@echo install targets
-	mkdir -p $(ANDROID_PRODUCT_OUT)/system/lib/modules
-	cp -fv $(PWD)/$(MODULE_NAME).ko $(ANDROID_PRODUCT_OUT)/system/lib/modules/$(MODULE_NAME).ko
-	make clean
-
-clean:
-	$(MAKE) -C $(KDIR) M=$(PWD) clean
-	$(RM) Module.markers
-	$(RM) modules.order
