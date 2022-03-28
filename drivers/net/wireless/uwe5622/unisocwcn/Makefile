@@ -6,9 +6,6 @@ EXTRA_CFLAGS=-fno-pic
 
 all_dependencies := driver
 driver_dependencies :=
-BIN2HEX_TOOL := $(PWD)/fw/bin2hex
-firmware_file := $(PWD)/fw/wcnmodem.bin
-firmware_target := $(PWD)/fw/wcnmodem.bin.hex
 
 #### Global configs for each item ######
 ifeq ($(CFG_HI_WIFI_DEVICE_UWE5621),y)
@@ -132,7 +129,6 @@ ccflags-y += -DCONFIG_HISI_BOARD
 #ccflags-y += -DCONFIG_WCN_CHIPEN
 #ccflags-y += -DCONFIG_WCN_RESET
 #ccflags-y += -DCONFIG_WCN_POWER_UP_DOWN
-#ccflags-y += -DCONFIG_WCN_DOWNLOAD_FIRMWARE_FROM_HEX
 ccflags-y += -DCONFIG_BT_WAKE_HOST_EN
 #ccflags-y += -DCONFIG_WL_WAKE_HOST_EN
 ccflags-y += -DCONFIG_WCN_RESUME_POWER_DOWN
@@ -162,7 +158,6 @@ ccflags-y += -DCONFIG_HISI_BOARD
 #ccflags-y += -DCONFIG_WCN_CHIPEN
 #ccflags-y += -DCONFIG_WCN_RESET
 #ccflags-y += -DCONFIG_WCN_POWER_UP_DOWN
-#ccflags-y += -DCONFIG_WCN_DOWNLOAD_FIRMWARE_FROM_HEX
 ccflags-y += -DCONFIG_BT_WAKE_HOST_EN
 #ccflags-y += -DCONFIG_WL_WAKE_HOST_EN
 ccflags-y += -DCONFIG_WCN_RESUME_POWER_DOWN
@@ -191,7 +186,6 @@ ccflags-y += -DCONFIG_HISI_BOARD
 #ccflags-y += -DCONFIG_WCN_RESET
 #ccflags-y += -DCONFIG_WCN_POWER_UP_DOWN
 #ccflags-y += -DCONFIG_WCN_INT_AP
-#ccflags-y += -DCONFIG_WCN_DOWNLOAD_FIRMWARE_FROM_HEX
 #ccflags-y += -DCONFIG_BT_WAKE_HOST_EN
 #ccflags-y += -DCONFIG_WL_WAKE_HOST_EN
 #ccflags-y += -DCONFIG_WCN_RESUME_POWER_DOWN
@@ -216,7 +210,6 @@ ccflags-y += -DCONFIG_AML_BOARD
 #ccflags-y += -DCONFIG_WCN_RESET
 ccflags-y += -DCONFIG_WCN_RESET_PIN_CONNECTED
 ccflags-y += -DCONFIG_WCN_POWER_UP_DOWN
-ccflags-y += -DCONFIG_WCN_DOWNLOAD_FIRMWARE_FROM_HEX
 ccflags-y += -DCONFIG_BT_WAKE_HOST_EN
 #ccflags-y += -DCONFIG_WL_WAKE_HOST_EN
 #ccflags-y += -DCONFIG_WCN_RESUME_POWER_DOWN
@@ -231,8 +224,6 @@ ccflags-y += -DCONFIG_SDIO_INBAND_INT
 #ccflags-y += -DCONFIG_SDIO_INBAND_POLLING
 ccflags-y += -DCONFIG_SDIO_BLKSIZE_512
 #ccflags-y += -DCONFIG_SDIO_PWRSEQ
-
-driver_dependencies += $(firmware_target)
 endif
 
 ifeq ($(CFG_AML_WIFI_DEVICE_UWE5622),y)
@@ -243,7 +234,6 @@ ccflags-y += -DCONFIG_AML_BOARD
 #ccflags-y += -DCONFIG_WCN_RESET
 #ccflags-y += -DCONFIG_WCN_RESET_PIN_CONNECTED
 ccflags-y += -DCONFIG_WCN_POWER_UP_DOWN
-#ccflags-y += -DCONFIG_WCN_DOWNLOAD_FIRMWARE_FROM_HEX
 #ccflags-y += -DCONFIG_BT_WAKE_HOST_EN
 #ccflags-y += -DCONFIG_WL_WAKE_HOST_EN
 #ccflags-y += -DCONFIG_WCN_RESUME_POWER_DOWN
@@ -260,8 +250,6 @@ endif
 #ccflags-y += -DCONFIG_SDIO_INBAND_POLLING
 ccflags-y += -DCONFIG_SDIO_BLKSIZE_512
 #ccflags-y += -DCONFIG_SDIO_PWRSEQ
-
-driver_dependencies += $(firmware_target)
 endif
 ### ---------- Amlogic end ---------- ###
 
@@ -270,7 +258,6 @@ ifeq ($(CONFIG_RK_WIFI_DEVICE_UWE5621),y)
 #### add cflag ######
 ccflags-y += -DCONFIG_RK_BOARD
 ccflags-y += -DCONFIG_WCN_PARSE_DTS
-#ccflags-y += -DCONFIG_WCN_DOWNLOAD_FIRMWARE_FROM_HEX
 #ccflags-y += -DCONFIG_WCN_RESUME_POWER_DOWN
 #ccflags-y += -DCONFIG_WCN_RESUME_KEEPPWR_RESETSDIO
 #ccflags-y += -DCONFIG_WCN_CHECK_MODULE_VENDOR
@@ -287,7 +274,6 @@ ifeq ($(CONFIG_RK_WIFI_DEVICE_UWE5622),y)
 #### add cflag ######
 ccflags-y += -DCONFIG_RK_BOARD
 ccflags-y += -DCONFIG_WCN_PARSE_DTS
-#ccflags-y += -DCONFIG_WCN_DOWNLOAD_FIRMWARE_FROM_HEX
 #ccflags-y += -DCONFIG_WCN_RESUME_POWER_DOWN
 #ccflags-y += -DCONFIG_WCN_RESUME_KEEPPWR_RESETSDIO
 #ccflags-y += -DCONFIG_WCN_CHECK_MODULE_VENDOR
@@ -310,7 +296,6 @@ ccflags-y += -DCONFIG_AW_BOARD
 #ccflags-y += -DCONFIG_WCN_RESET
 #ccflags-y += -DCONFIG_WCN_RESET_PIN_CONNECTED
 ccflags-y += -DCONFIG_WCN_POWER_UP_DOWN
-#ccflags-y += -DCONFIG_WCN_DOWNLOAD_FIRMWARE_FROM_HEX
 ccflags-y += -DCONFIG_BT_WAKE_HOST_EN
 ccflags-y += -DCONFIG_WL_WAKE_HOST_EN
 #ccflags-y += -DCONFIG_WCN_RESUME_POWER_DOWN
@@ -389,10 +374,6 @@ CROSS_COMPILE ?= arm-histbv310-linux-
 EXTRA_CFLAGS += -I $(srctree)/$(src)/include -D__linux__
 
 all: $(all_dependencies)
-
-$(firmware_target): $(firmware_file)
-	@echo Convert $(firmware_file) to $(firmware_target)
-	@$(BIN2HEX_TOOL) $(firmware_file)
 
 driver: $(driver_dependencies)
 	@echo Convert $(firmware_file) to $(firmware_target)
