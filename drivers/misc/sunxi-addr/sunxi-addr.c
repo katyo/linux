@@ -211,8 +211,7 @@ static int addr_factory(struct device_node *np,
 		memset(cmp_buf, 0x00, ID_LEN);
 		if (memcmp(id, cmp_buf, ID_LEN) == 0)
 			return -1;
-		if (sha256(id, ID_LEN, hash))
-			return -1;
+		sha256(id, ID_LEN, hash);
 		memcpy(mac, &hash[idx * ADDR_VAL_LEN], ADDR_VAL_LEN);
 		break;
 	case TYPE_RAND:
