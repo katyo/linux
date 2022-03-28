@@ -8,14 +8,6 @@ ifneq ($(UNISOC_BSP_INCLUDE),)
 ccflags-y += -I$(UNISOC_BSP_INCLUDE)
 endif
 
-ifneq ($(UNISOC_WIFI_CUS_CONFIG),)
-ccflags-y += -DCUSTOMIZE_WIFI_CFG_PATH=\"$(UNISOC_WIFI_CUS_CONFIG)\"
-endif
-
-ifneq ($(UNISOC_WIFI_MAC_FILE),)
-ccflags-y += -DCUSTOMIZE_WIFI_MAC_FILE=\"$(UNISOC_WIFI_MAC_FILE)\"
-endif
-
 ####add cflag######
 ccflags-y += -DIBSS_SUPPORT -DIBSS_RSN_SUPPORT
 ccflags-y += -DNAN_SUPPORT
