@@ -363,7 +363,7 @@
 	#size-cells = <0>;
 	status = "okay";
 
-	spidev@1 {
+	spidev@0 {
 		compatible = "spidev";
 		status = "okay";
 		reg = <0>;
