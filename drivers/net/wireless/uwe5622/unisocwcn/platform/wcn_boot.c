@@ -88,26 +88,12 @@ struct gpio_config {
 };
 #endif
 
-#define WCN_FW_MAX_PATH_NUM	3
-/* path of cp2 firmware. */
-#ifdef CONFIG_CUSTOMIZE_UNISOC_FW_PATH
-#define UNISOC_FW_PATH_DEFAULT CONFIG_CUSTOMIZE_UNISOC_FW_PATH
-#else
-#define UNISOC_FW_PATH_DEFAULT "/system/etc/firmware/"
-#endif
-static char *wcn_fw_path[WCN_FW_MAX_PATH_NUM] = {
-	UNISOC_FW_PATH_DEFAULT,		/* most of projects */
-	"/lib/firmware/"		/* allwinner r328... */
-};
 #define WCN_FW_NAME	"wcnmodem.bin"
 #define GNSS_FW_NAME	"gnssmodem.bin"
 
 #ifndef REG_PMU_APB_XTL_WAIT_CNT0
 #define REG_PMU_APB_XTL_WAIT_CNT0 0xe42b00ac
 #endif
-
-static char BTWF_FIRMWARE_PATH[255];
-static char GNSS_FIRMWARE_PATH[255];
 
 struct wcn_sync_info_t {
 	unsigned int init_status;
@@ -247,8 +233,6 @@ struct marlin_device {
 	struct work_struct gnss_dl_wq;
 	bool no_power_off;
 	bool wait_ge2;
-	bool is_btwf_in_sysfs;
-	bool is_gnss_in_sysfs;
 	int wifi_need_download_ini_flag;
 	int first_power_on_flag;
 	unsigned char download_finish_flag;
@@ -878,63 +862,6 @@ static const struct imageinfo *marlin_judge_images(const unsigned char *buffer)
 	return NULL;
 }
 
-static char *load_firmware_data_path(const char *path, loff_t offset,
-	unsigned long int imag_size)
-{
-	int read_len, size, i, opn_num_max = 1;
-	char *buffer = NULL;
-	char *data = NULL;
-	struct file *file;
-
-	WCN_DEBUG("%s Enter\n", __func__);
-	file = filp_open(path, O_RDONLY, 0);
-	for (i = 1; i <= opn_num_max; i++) {
-		if (IS_ERR(file)) {
-			WCN_DEBUG("%s: try open file %s,count_num:%d\n",
-				  __func__, path, i);
-			ssleep(1);
-			file = filp_open(path, O_RDONLY, 0);
-		} else
-			break;
-	}
-	if (IS_ERR(file)) {
-		WCN_ERR("%s: open file %s error\n",
-			__func__, path);
-		return NULL;
-	}
-	WCN_DEBUG("marlin %s open image file sucessfully\n",
-		  __func__);
-	size = imag_size;
-	buffer = vmalloc(size);
-	if (!buffer) {
-		fput(file);
-		WCN_ERR("no memory for image\n");
-		return NULL;
-	}
-
-	data = buffer;
-	do {
-#if KERNEL_VERSION(4, 14, 0) <= LINUX_VERSION_CODE
-		read_len = kernel_read(file, (void *)buffer, size, &offset);
-#else
-		read_len = kernel_read(file, offset, buffer, size);
-#endif
-		if (read_len > 0) {
-			size -= read_len;
-			buffer += read_len;
-		}
-	} while ((read_len > 0) && (size > 0));
-	fput(file);
-	WCN_DEBUG("%s finish read_Len:%d\n", __func__, read_len);
-#if KERNEL_VERSION(4, 14, 0) > LINUX_VERSION_CODE
-	/* kernel_read return value changed. */
-	if (read_len <= 0)
-		return NULL;
-#endif
-
-	return data;
-}
-
 static int sprdwcn_bus_direct_write_dispack(unsigned int addr, const void *buf,
 		size_t buf_size, size_t packet_max_size)
 {
@@ -975,8 +902,6 @@ struct marlin_firmware {
 static int marlin_request_firmware(struct marlin_firmware **mfirmware_p)
 {
 	struct marlin_firmware *mfirmware;
-	unsigned char load_fw_cnt = 0;
-	const void *buffer;
 	const struct firmware *firmware;
 	int ret = 0;
 
@@ -985,78 +910,40 @@ static int marlin_request_firmware(struct marlin_firmware **mfirmware_p)
 	if (!mfirmware)
 		return -ENOMEM;
 
-#ifdef CONFIG_WCN_PARSE_DTS
-	marlin_dev->is_btwf_in_sysfs = 1;
-#endif
-#ifdef CONFIG_AW_BOARD
-	marlin_dev->is_btwf_in_sysfs = 1;
-#endif
+	/*
+	 * If first power on, download from partition,
+	 * else download from backup firmware.
+	 */
+	if (marlin_dev->first_power_on_flag == 1) {
+		WCN_INFO("%s from %s start!\n", __func__, WCN_FW_NAME);
+		ret = request_firmware(&firmware, WCN_FW_NAME, NULL);
+		if (ret < 0) {
+			WCN_ERR("%s not find %s errno:(%d)(ignore!!)\n",
+							__func__, WCN_FW_NAME, ret);
 
-	if (marlin_dev->is_btwf_in_sysfs != 1) {
-		/*
-		 * If first power on, download from partition,
-		 * else download from backup firmware.
-		 */
-		if (marlin_dev->first_power_on_flag == 1) {
-			WCN_INFO("%s from %s%s start!\n", __func__,
-				 wcn_fw_path[0], WCN_FW_NAME);
-			ret = request_firmware(&firmware, WCN_FW_NAME, NULL);
-			if (ret < 0) {
-				WCN_ERR("%s not find %s errno:(%d)(ignore!!)\n",
-					__func__, WCN_FW_NAME, ret);
-				marlin_dev->is_btwf_in_sysfs = 1;
-
-				return ret;
-			}
-
-			mfirmware->priv = (void *)firmware;
-			mfirmware->data = firmware->data;
-			mfirmware->size = firmware->size;
-			mfirmware->is_from_fs = 1;
-			marlin_dev->firmware.size = firmware->size;
-			marlin_dev->firmware.data = vmalloc(firmware->size);
-			if (!marlin_dev->firmware.data) {
-				WCN_INFO("%s malloc backup error!\n", __func__);
-				return -1;
-			}
-
-			memcpy(marlin_dev->firmware.data, firmware->data,
-			       firmware->size);
-		} else {
-			WCN_INFO("marlin %s from backup start!\n", __func__);
-			mfirmware->priv = (void *)(&marlin_dev->firmware);
-			mfirmware->data = marlin_dev->firmware.data;
-			mfirmware->size = marlin_dev->firmware.size;
-			mfirmware->is_from_fs = 0;
+			return ret;
 		}
-	} else {
-		/* NOTE! We canot guarantee the img is complete when we read it
-		 * first! The macro FIRMWARE_MAX_SIZE only guarantee AA(first in
-		 * partition) img is complete. So we need read this img two
-		 * times (other time in marlin_firmware_parse_image)
-		 */
-load_fw:
-		WCN_INFO("%s from %s start!\n", __func__, BTWF_FIRMWARE_PATH);
-		marlin_dev->is_btwf_in_sysfs = 1;
-		buffer = load_firmware_data_path(BTWF_FIRMWARE_PATH, 0,
-						 FIRMWARE_MAX_SIZE);
-		if (!buffer) {
-			load_fw_cnt++;
-			WCN_DEBUG("%s buff is NULL\n", __func__);
-			if (load_fw_cnt < WCN_FW_MAX_PATH_NUM) {
-				sprintf(BTWF_FIRMWARE_PATH, "%s%s",
-					wcn_fw_path[load_fw_cnt],
-					WCN_FW_NAME);
-				goto load_fw;
-			}
-			kfree(mfirmware);
+
+		mfirmware->priv = (void *)firmware;
+		mfirmware->data = firmware->data;
+		mfirmware->size = firmware->size;
+		mfirmware->is_from_fs = 1;
+		marlin_dev->firmware.size = firmware->size;
+		marlin_dev->firmware.data = vmalloc(firmware->size);
+
+		if (!marlin_dev->firmware.data) {
+			WCN_INFO("%s malloc backup error!\n", __func__);
 			return -1;
 		}
 
-		mfirmware->data = buffer;
-		mfirmware->size = FIRMWARE_MAX_SIZE;
+		memcpy(marlin_dev->firmware.data, firmware->data,
+					 firmware->size);
+	} else {
+		WCN_INFO("marlin %s from backup start!\n", __func__);
+		mfirmware->priv = (void *)(&marlin_dev->firmware);
+		mfirmware->data = marlin_dev->firmware.data;
+		mfirmware->size = marlin_dev->firmware.size;
 		mfirmware->is_from_fs = 0;
-		mfirmware->priv = buffer;
 	}
 
 	memcpy(functionmask, mfirmware->data, 8);
@@ -1076,7 +963,6 @@ static int marlin_firmware_parse_image(struct marlin_firmware *mfirmware)
 {
 	int offset = 0;
 	int size = 0;
-	int old_mfirmware_size = mfirmware->size;
 
 	if (bin_magic_is(mfirmware->data, IMG_HEAD_MAGIC)) {
 		const struct imageinfo *info;
@@ -1110,31 +996,6 @@ static int marlin_firmware_parse_image(struct marlin_firmware *mfirmware)
 		mfirmware->size = img_real_size;
 		size = img_real_size;
 	}
-
-#ifndef CONFIG_WCN_RESUME_POWER_DOWN
-	if (!mfirmware->is_from_fs && (offset + size) > old_mfirmware_size) {
-		const void *buffer;
-
-		/* NOTE! We canot guarantee the img is complete when we read it
-		 * first! The macro FIRMWARE_MAX_SIZE only guarantee AA(first in
-		 * partition) img is complete. So we need read this img two
-		 * times (in this)
-		 */
-		buffer = load_firmware_data_path(BTWF_FIRMWARE_PATH,
-				offset, size);
-		if (!buffer) {
-			WCN_ERR("marlin:%s buffer is NULL\n", __func__);
-			return -1;
-		}
-		/* struct data "info" is a part of mfirmware->priv,
-		 * if we free mfirmware->priv, "info" will be free too!
-		 * so we need free priv at here after use "info"
-		 */
-		vfree(mfirmware->priv);
-		mfirmware->data = buffer;
-		mfirmware->priv = buffer;
-	}
-#endif
 
 	return 0;
 }
@@ -1255,63 +1116,18 @@ void wcn_gnss_ops_unregister(void)
 	gnss_ops = NULL;
 }
 
-static char *gnss_load_firmware_data(unsigned long int imag_size)
-{
-	char *buf;
-
-	MDBG_LOG("%s entry\n", __func__);
-	if (gnss_ops && (gnss_ops->set_file_path))
-		gnss_ops->set_file_path(&GNSS_FIRMWARE_PATH[0]);
-	else
-		WCN_ERR("%s gnss_ops set_file_path error\n", __func__);
-	buf = load_firmware_data_path(GNSS_FIRMWARE_PATH, 0, imag_size);
-
-	return buf;
-}
-
-static int gnss_download_from_partition(void)
-{
-	int err;
-	unsigned long int imgpack_size, img_size;
-	char *buffer = NULL;
-	char *temp = NULL;
-
-	img_size = imgpack_size =  GNSS_FIRMWARE_MAX_SIZE;
-	WCN_INFO("GNSS %s entry\n", __func__);
-	temp = buffer = gnss_load_firmware_data(imgpack_size);
-	if (!buffer) {
-		WCN_INFO("%s gnss buff is NULL\n", __func__);
-		return -1;
-	}
-
-	err = sprdwcn_bus_direct_write_dispack(GNSS_CP_START_ADDR, buffer,
-			img_size, PACKET_SIZE);
-	vfree(temp);
-	if (!err)
-		WCN_INFO("%s gnss download firmware finish\n", __func__);
-
-	return err;
-}
-
 static int gnss_download_firmware(void)
 {
 	const struct firmware *firmware;
 	char *buf;
 	int err;
 
-	if (marlin_dev->is_gnss_in_sysfs == 1) {
-		err = gnss_download_from_partition();
-		return err;
-	}
-
-	WCN_INFO("%s start from /system/etc/firmware/\n", __func__);
+	WCN_INFO("%s request gnss firmware\n", __func__);
 	buf = marlin_dev->write_buffer;
 	err = request_firmware(&firmware, GNSS_FW_NAME, NULL);
 	if (err < 0) {
 		WCN_ERR("%s no find %s err:%d(ignore)\n",
 			__func__, GNSS_FW_NAME, err);
-		marlin_dev->is_gnss_in_sysfs = 1;
-		err = gnss_download_from_partition();
 
 		return err;
 	}
@@ -1630,25 +1446,6 @@ static int marlin_parse_dt(struct platform_device *pdev)
 			WCN_ERR("xtal 26m gpio request err: %d\n", ret);
 	}
 #endif
-
-	ret = of_property_read_string(np, "unisoc,btwf-file-name",
-				      (const char **)&marlin_dev->btwf_path);
-	if (!ret)
-		strcpy(BTWF_FIRMWARE_PATH, marlin_dev->btwf_path);
-	else
-		sprintf(BTWF_FIRMWARE_PATH, "%s%s", wcn_fw_path[0],
-			WCN_FW_NAME);
-	WCN_DEBUG("btwf firmware path is %s\n", BTWF_FIRMWARE_PATH);
-
-	ret = of_property_read_string(np, "unisoc,gnss-file-name",
-				      (const char **)&marlin_dev->gnss_path);
-	if (!ret) {
-		WCN_INFO("gnss firmware name:%s\n", marlin_dev->gnss_path);
-		strcpy(GNSS_FIRMWARE_PATH, marlin_dev->gnss_path);
-	}
-#else
-	sprintf(BTWF_FIRMWARE_PATH, "%s%s", wcn_fw_path[0], WCN_FW_NAME);
-	WCN_DEBUG("btwf firmware path is %s\n", BTWF_FIRMWARE_PATH);
 #endif /* end of CONFIG_WCN_PARSE_DTS */
 
 #ifdef CONFIG_WCN_PARSE_DTS
@@ -2832,41 +2629,10 @@ static int marlin_scan_finish(void)
 	return 0;
 }
 
-int find_firmware_path(void)
-{
-	int ret;
-	int pre_len;
-
-	if (strlen(BTWF_FIRMWARE_PATH) != 0)
-		return 0;
-
-	ret = parse_firmware_path(BTWF_FIRMWARE_PATH);
-	if (ret != 0) {
-		WCN_ERR("can not find wcn partition\n");
-		return ret;
-	}
-	WCN_INFO("BTWF path is %s\n", BTWF_FIRMWARE_PATH);
-	pre_len = strlen(BTWF_FIRMWARE_PATH) - strlen("wcnmodem");
-	memcpy(GNSS_FIRMWARE_PATH,
-		BTWF_FIRMWARE_PATH,
-		strlen(BTWF_FIRMWARE_PATH));
-	memcpy(&GNSS_FIRMWARE_PATH[pre_len], "gnssmodem",
-		strlen("gnssmodem"));
-	GNSS_FIRMWARE_PATH[pre_len + strlen("gnssmodem")] = '\0';
-	WCN_INFO("GNSS path is %s\n", GNSS_FIRMWARE_PATH);
-
-	return 0;
-}
-
 static void pre_gnss_download_firmware(struct work_struct *work)
 {
 	static int cali_flag;
 	int ret = 0;
-
-	/* ./fstab.xxx is prevent for user space progress */
-	if (marlin_dev->first_power_on_flag == 1)
-		if (find_firmware_path() < 0)
-			return;
 
 	if (gnss_download_firmware() != 0) {
 		WCN_ERR("gnss download firmware fail\n");
@@ -2899,7 +2665,6 @@ static void pre_gnss_download_firmware(struct work_struct *work)
 
 	}
 	complete(&marlin_dev->gnss_download_done);	/* temp */
-
 }
 
 #ifdef CONFIG_WCN_USB
@@ -4095,3 +3860,5 @@ module_exit(marlin_exit);
 MODULE_LICENSE("GPL v2");
 MODULE_DESCRIPTION("Spreadtrum  WCN Marlin Driver");
 MODULE_AUTHOR("Yufeng Yang <yufeng.yang@spreadtrum.com>");
+MODULE_FIRMWARE(WCN_FW_NAME);
+MODULE_FIRMWARE(GNSS_FW_NAME);
