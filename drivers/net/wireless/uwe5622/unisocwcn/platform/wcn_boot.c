@@ -51,10 +51,6 @@
 #include "wcn_glb_reg.h"
 #include "wcn_glb.h"
 
-#ifdef CONFIG_WCN_DOWNLOAD_FIRMWARE_FROM_HEX
-#include "../fw/firmware_hex.h"
-#endif
-
 #ifdef CONFIG_AML_BOARD
 #include <linux/amlogic/aml_gpio_consumer.h>
 
@@ -325,11 +321,7 @@ static struct regmap *reg_map;
 #define AFC_CALI_READ_FINISH 0x12121212
 #define WCN_AFC_CALI_PATH "/productinfo/wcn/tsx_bt_data.txt"
 
-#ifdef CONFIG_WCN_DOWNLOAD_FIRMWARE_FROM_HEX
-#define POWER_WQ_DELAYED_MS 0
-#else
 #define POWER_WQ_DELAYED_MS 7500
-#endif
 
 /* #define E2S(x) { case x: return #x; } */
 
@@ -983,12 +975,10 @@ struct marlin_firmware {
 static int marlin_request_firmware(struct marlin_firmware **mfirmware_p)
 {
 	struct marlin_firmware *mfirmware;
-#ifndef CONFIG_WCN_DOWNLOAD_FIRMWARE_FROM_HEX
 	unsigned char load_fw_cnt = 0;
 	const void *buffer;
 	const struct firmware *firmware;
 	int ret = 0;
-#endif
 
 	*mfirmware_p = NULL;
 	mfirmware = kmalloc(sizeof(struct marlin_firmware), GFP_KERNEL);
@@ -1001,17 +991,6 @@ static int marlin_request_firmware(struct marlin_firmware **mfirmware_p)
 #ifdef CONFIG_AW_BOARD
 	marlin_dev->is_btwf_in_sysfs = 1;
 #endif
-
-#ifdef CONFIG_WCN_DOWNLOAD_FIRMWARE_FROM_HEX
-
-	/* Some customer (amlogic) download fw from /fw/wcnmodem.bin.hex */
-	WCN_INFO("marlin %s from wcnmodem.bin.hex start!\n", __func__);
-	mfirmware->data = firmware_hex_buf;
-	mfirmware->size = FIRMWARE_HEX_SIZE;
-	mfirmware->is_from_fs = 0;
-	mfirmware->priv = firmware_hex_buf;
-
-#else /* CONFIG_WCN_DOWNLOAD_FIRMWARE_FROM_HEX */
 
 	if (marlin_dev->is_btwf_in_sysfs != 1) {
 		/*
@@ -1079,8 +1058,6 @@ load_fw:
 		mfirmware->is_from_fs = 0;
 		mfirmware->priv = buffer;
 	}
-
-#endif /* CONFIG_WCN_DOWNLOAD_FIRMWARE_FROM_HEX */
 
 	memcpy(functionmask, mfirmware->data, 8);
 	if ((functionmask[0] == 0x00) && (functionmask[1] == 0x00)) {
