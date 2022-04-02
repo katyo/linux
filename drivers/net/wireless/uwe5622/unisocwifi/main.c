@@ -1355,6 +1355,7 @@ static struct sprdwl_vif *sprdwl_register_netdev(struct sprdwl_priv *priv,
 	struct net_device *ndev;
 	struct wireless_dev *wdev;
 	struct sprdwl_vif *vif;
+	uint8_t dev_addr[6];
 	int ret;
 
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 17, 0))
@@ -1411,7 +1412,8 @@ static struct sprdwl_vif *sprdwl_register_netdev(struct sprdwl_priv *priv,
 	ndev->features |= NETIF_F_SG;
 	SET_NETDEV_DEV(ndev, wiphy_dev(priv->wiphy));
 
-	sprdwl_set_mac_addr(vif, addr, ndev->dev_addr);
+	sprdwl_set_mac_addr(vif, addr, dev_addr);
+	eth_hw_addr_set(ndev, dev_addr);
 
 #ifdef CONFIG_P2P_INTF
 	if (type == NL80211_IFTYPE_P2P_DEVICE)
