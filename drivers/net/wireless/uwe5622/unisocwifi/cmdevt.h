@@ -907,6 +907,7 @@ struct sprdwl_tlv_data {
 /* TLV type list */
 #define GET_INFO_TLV_TP_OTT	1
 #define NOTIFY_AP_VERSION	2
+#define NOTIFY_CREDIT_VIA_RX_DATA 5
 
 struct ap_version_tlv_elmt {
 #define NOTIFY_AP_VERSION_USER 0
@@ -967,7 +968,7 @@ int sprdwl_set_whitelist(struct sprdwl_priv *priv, u8 vif_ctx_id,
 			 u8 sub_type, u8 num, u8 *mac_addr);
 
 int sprdwl_open_fw(struct sprdwl_priv *priv, u8 *vif_ctx_id, u8 mode,
-		   u8 *mac_addr);
+		   const u8 *mac_addr);
 int sprdwl_close_fw(struct sprdwl_priv *priv, u8 vif_ctx_id, u8 mode);
 int sprdwl_add_key(struct sprdwl_priv *priv, u8 vif_ctx_id, const u8 *key_data,
 		   u8 key_len, u8 pairwise, u8 key_index, const u8 *key_seq,
