@@ -3791,8 +3791,10 @@ static int hci_init_sync(struct hci_dev *hdev)
 		return 0;
 
 	err = hci_init3_sync(hdev);
+#if IS_ENABLED(CONFIG_RK_WIFI_DEVICE_UWE5621) || IS_ENABLED(CONFIG_AW_WIFI_DEVICE_UWE5622)
 	if (err < 0)
 		return err;
+#endif /* IS_ENABLED(CONFIG_RK_WIFI_DEVICE_UWE5621) || IS_ENABLED(CONFIG_AW_WIFI_DEVICE_UWE5622) */
 
 	err = hci_init4_sync(hdev);
 	if (err < 0)
