@@ -4,7 +4,8 @@
 
 config SUNXI_SYS_INFO
 	tristate "sunxi system info driver"
-	default y
+	depends on ARCH_SUNXI
+	depends on NVMEM_SUNXI_SID
 	help
 	  This driver is used for query system information.
 	  If you don't know whether need it, please select y.
