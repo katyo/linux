@@ -94,10 +94,6 @@ extern long int sdiohal_log_level;
 #define SDIO_RX_LIST_NUM SDIO_CHN_RX_NUM
 #define MAX_CHAIN_NODE_NUM 100
 
-/* task prio */
-#define SDIO_TX_TASK_PRIO 89
-#define SDIO_RX_TASK_PRIO 90
-
 /* mbuf max size */
 #define MAX_MBUF_SIZE (2 << 10)
 
