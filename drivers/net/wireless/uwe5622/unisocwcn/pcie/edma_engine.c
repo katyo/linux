@@ -1434,15 +1434,8 @@ int edma_init(struct wcn_pcie_info *pcie_info)
 
 		return -1;
 	}
-	do {
-		struct sched_param param;
 
-		param.sched_priority = 90;
-		ret = sched_setscheduler((struct task_struct *)edma->isr_func
-					  .entity, SCHED_FIFO, &param);
-		PCIE_INFO("sched_setscheduler(SCHED_FIFO), prio:%d,ret:%d\n",
-			param.sched_priority, ret);
-	} while (0);
+	sched_set_fifo((struct task_struct *)edma->isr_func.entity);
 
 	wake_up_process(edma->isr_func.entity);
 #endif
