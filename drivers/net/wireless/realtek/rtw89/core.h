@@ -2624,6 +2624,10 @@ struct rtw89_sar_info {
 	};
 };
 
+struct rtw89_chanctx_cfg {
+	enum rtw89_sub_entity_idx idx;
+};
+
 enum rtw89_entity_mode {
 	RTW89_ENTITY_MODE_SCC,
 };
