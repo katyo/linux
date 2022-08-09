@@ -5,6 +5,7 @@
 #include <linux/devcoredump.h>
 
 #include "cam.h"
+#include "chan.h"
 #include "debug.h"
 #include "fw.h"
 #include "mac.h"
@@ -604,6 +605,7 @@ bottom:
 
 	ser_reset_mac_binding(rtwdev);
 	rtw89_core_stop(rtwdev);
+	rtw89_entity_init(rtwdev);
 	INIT_LIST_HEAD(&rtwdev->rtwvifs_list);
 }
 
