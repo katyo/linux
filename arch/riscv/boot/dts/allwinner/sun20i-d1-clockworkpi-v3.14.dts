@@ -66,6 +66,12 @@
 		VCC-supply = <&reg_aldo1>;
 	};
 
+	backlight: backlight {
+		compatible = "pwm-backlight";
+		power-supply = <&reg_vcc>;
+		pwms = <&pwm 4 50000 0>; /* PD20/GPIO9 */
+	};
+
 	/*
 	 * This regulator is PWM-controlled, but the PWM controller is not
 	 * yet supported, so fix the regulator to its default voltage.
@@ -293,7 +299,7 @@
 };
 
 &pwm {
-	pinctrl-0 = <&pwm0_pd16_pin>;
+	pinctrl-0 = <&pwm0_pd16_pin>, <&pwm4_pd20_pin>;
 	pinctrl-names = "default";
 	status = "okay";
 };
