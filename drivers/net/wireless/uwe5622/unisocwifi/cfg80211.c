@@ -984,7 +984,8 @@ static int sprdwl_cfg80211_change_beacon(struct wiphy *wiphy,
 	return sprdwl_change_beacon(vif, beacon);
 }
 
-static int sprdwl_cfg80211_stop_ap(struct wiphy *wiphy, struct net_device *ndev)
+static int sprdwl_cfg80211_stop_ap(struct wiphy *wiphy, struct net_device *ndev,
+																	 unsigned int link_id)
 {
 #ifdef DFS_MASTER
 	struct sprdwl_vif *vif = netdev_priv(ndev);
