@@ -208,6 +208,19 @@
 			#size-cells = <1>;
 			ranges;
 
+			sram_a2: sram@100000 {
+				compatible = "mmio-sram";
+				reg = <0x00100000 0x18000>;
+				#address-cells = <1>;
+				#size-cells = <1>;
+				ranges = <0 0x00100000 0x18000>;
+
+				scpi_sram: scpi-sram@17c00 {
+					compatible = "arm,scp-shmem";
+					reg = <0x17c00 0x200>;
+				};
+			};
+
 			sram_c: sram@28000 {
 				compatible = "mmio-sram";
 				reg = <0x00028000 0x30000>;
@@ -333,6 +346,7 @@
 			interrupt-controller;
 			#interrupt-cells = <3>;
 
+			/omit-if-no-ref/
 			ext_rgmii_pins: rgmii-pins {
 				pins = "PI0", "PI1", "PI2", "PI3", "PI4",
 				       "PI5", "PI7", "PI8", "PI9", "PI10",
@@ -342,14 +356,34 @@
 				drive-strength = <40>;
 			};
 
+			/omit-if-no-ref/
 			i2c0_pins: i2c0-pins {
 				pins = "PI6", "PI7";
 				function = "i2c0";
 			};
 
-			i2c3_ph_pins: i2c3-ph-pins {
+			/omit-if-no-ref/
+			i2c1_pins: i2c1-pins {
+				pins = "PH0", "PH1";
+				function = "i2c1";
+			};
+
+			/omit-if-no-ref/
+			i2c2_pins: i2c2-pins {
+				pins = "PH2", "PH3";
+				function = "i2c2";
+			};
+
+			/omit-if-no-ref/
+			i2c3_pins: i2c3-pins {
 				pins = "PH4", "PH5";
 				function = "i2c3";
+			};
+
+			/omit-if-no-ref/
+			i2c4_pins: i2c4-pins {
+				pins = "PH6", "PH7";
+				function = "i2c4";
 			};
 
 			/omit-if-no-ref/
@@ -445,6 +479,12 @@
 				function = "spi1";
 			};
 
+			/omit-if-no-ref/
+			spi1_cs1_pin: spi1-cs1-pin {
+				pins = "PH9";
+				function = "spi1";
+			};
+
 			uart0_ph_pins: uart0-ph-pins {
 				pins = "PH0", "PH1";
 				function = "uart0";
@@ -460,6 +500,18 @@
 			uart1_rts_cts_pins: uart1-rts-cts-pins {
 				pins = "PG8", "PG9";
 				function = "uart1";
+			};
+
+			/omit-if-no-ref/
+			uart2_ph_pins: uart2-ph-pins {
+				pins = "PH5", "PH6";
+				function = "uart2";
+			};
+
+			/omit-if-no-ref/
+			uart2_rts_cts_pins: uart2-rts-cts-pins {
+				pins = "PH7", "PH8";
+				function = "uart2";
 			};
 
 			/omit-if-no-ref/
@@ -756,6 +808,8 @@
 			interrupts = <GIC_SPI 7 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&ccu CLK_BUS_I2C1>;
 			resets = <&ccu RST_BUS_I2C1>;
+			pinctrl-names = "default";
+			pinctrl-0 = <&i2c1_pins>;
 			status = "disabled";
 			#address-cells = <1>;
 			#size-cells = <0>;
@@ -769,6 +823,8 @@
 			interrupts = <GIC_SPI 8 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&ccu CLK_BUS_I2C2>;
 			resets = <&ccu RST_BUS_I2C2>;
+			pinctrl-names = "default";
+			pinctrl-0 = <&i2c2_pins>;
 			status = "disabled";
 			#address-cells = <1>;
 			#size-cells = <0>;
@@ -782,6 +838,8 @@
 			interrupts = <GIC_SPI 9 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&ccu CLK_BUS_I2C3>;
 			resets = <&ccu RST_BUS_I2C3>;
+			pinctrl-names = "default";
+			pinctrl-0 = <&i2c3_pins>;
 			status = "disabled";
 			#address-cells = <1>;
 			#size-cells = <0>;
@@ -795,6 +853,8 @@
 			interrupts = <GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&ccu CLK_BUS_I2C4>;
 			resets = <&ccu RST_BUS_I2C4>;
+			pinctrl-names = "default";
+			pinctrl-0 = <&i2c4_pins>;
 			status = "disabled";
 			#address-cells = <1>;
 			#size-cells = <0>;
@@ -1060,6 +1120,7 @@
 		};
 
 		hdmi: hdmi@6000000 {
+			#sound-dai-cells = <0>;
 			compatible = "allwinner,sun50i-h616-dw-hdmi",
 				     "allwinner,sun50i-h6-dw-hdmi";
 			reg = <0x06000000 0x10000>;
@@ -1255,6 +1316,8 @@
 			interrupts = <GIC_SPI 105 IRQ_TYPE_LEVEL_HIGH>;
 			clocks = <&r_ccu CLK_R_APB2_I2C>;
 			resets = <&r_ccu RST_R_APB2_I2C>;
+			pinctrl-names = "default";
+			pinctrl-0 = <&r_i2c_pins>;
 			status = "disabled";
 			#address-cells = <1>;
 			#size-cells = <0>;
