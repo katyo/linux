@@ -1248,8 +1248,8 @@
 			status = "okay";
 		};
 
-		addr_mgt: addr-mgt {
-			compatible = "allwinner,sunxi-addr_mgt";
+		addr_mgmt: addr-mgmt {
+			compatible = "allwinner,sunxi-addr-mgmt";
 			type_addr_wifi = <0x2>;
 			type_addr_bt = <0x2>;
 			type_addr_eth = <0x2>;

@@ -44,13 +44,13 @@
 			function = LED_FUNCTION_POWER;
 			color = <LED_COLOR_ID_RED>;
 			gpios = <&pio 2 12 GPIO_ACTIVE_HIGH>; /* PC12 */
-			default-state = "on";
 		};
 
 		led-1 {
 			function = LED_FUNCTION_STATUS;
 			color = <LED_COLOR_ID_GREEN>;
 			gpios = <&pio 2 13 GPIO_ACTIVE_HIGH>; /* PC13 */
+			default-state = "on";
 		};
 	};
 
@@ -107,6 +107,10 @@
 	status = "okay";
 };
 
+&ehci0 {
+	status = "okay";
+};
+
 &ehci1 {
 	status = "okay";
 };
@@ -119,6 +123,11 @@
 	status = "okay";
 };
 
+&gpu {
+	mali-supply = <&reg_dcdcc>;
+	status = "okay";
+};
+
 &hdmi {
 	hvcc-supply = <&reg_bldo1>;
 	status = "okay";
@@ -128,11 +137,6 @@
 	hdmi_out_con: endpoint {
 		remote-endpoint = <&hdmi_con_in>;
 	};
-};
-
-&gpu {
-	mali-supply = <&reg_dcdcc>;
-	status = "okay";
 };
 
 /* USB 2 & 3 are on headers only. */
@@ -182,6 +186,10 @@
 	};
 };
 
+&ohci0 {
+	status = "okay";
+};
+
 &ohci1 {
 	status = "okay";
 };
@@ -199,7 +207,7 @@
 
 	axp305: pmic@36 {
 		compatible = "x-powers,axp305", "x-powers,axp805",
-			     "x-powers,axp806";
+					 "x-powers,axp806";
 		interrupt-controller;
 		#interrupt-cells = <1>;
 		reg = <0x36>;
@@ -306,10 +314,10 @@
 };
 
 &cpu0 {
-        cpu-supply = <&reg_dcdca>;
+	cpu-supply = <&reg_dcdca>;
 };
 
-&spi0  {
+&spi0 {
 	status = "okay";
 
 	flash@0 {
@@ -327,10 +335,16 @@
 	status = "okay";
 };
 
+&uart2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart2_ph_pins>;
+	status = "disabled";
+};
+
 &uart5 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&uart5_ph_pins>;
-	status = "okay";
+	status = "disabled";
 };
 
 &usbotg {
@@ -354,10 +368,20 @@
 	status = "okay";
 };
 
+&i2c1 {
+	status = "disabled";
+};
+
+&i2c2 {
+	status = "disabled";
+};
+
 &i2c3 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&i2c3_ph_pins>;
-	status = "okay";
+	status = "disabled";
+};
+
+&i2c4 {
+	status = "disabled";
 };
 
 &ir {
@@ -369,20 +393,19 @@
 &spi1 {
 	#address-cells = <1>;
 	#size-cells = <0>;
-	status = "okay";
+	status = "disabled";
 
-	spidev@0 {
-		compatible = "spidev";
-		status = "okay";
-		reg = <0>;
+	spidev@1 {
+		compatible = "rohm,dh2228fv";
+		status = "disabled";
+		reg = <1>;
 		spi-max-frequency = <1000000>;
 	};
 };
 
 &codec {
-        allwinner,audio-routing =
-                "Line Out", "LINEOUT";
-        status = "okay";
+	allwinner,audio-routing = "Line Out", "LINEOUT";
+	status = "okay";
 };
 
 &ahub_codec {
