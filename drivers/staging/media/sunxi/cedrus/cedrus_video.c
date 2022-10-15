@@ -267,7 +267,7 @@ static int cedrus_try_fmt_vid_cap(struct file *file, void *priv,
 	if (!fmt)
 		return -EINVAL;
 
-	sps = cedrus_find_control_data(ctx, V4L2_CID_MPEG_VIDEO_HEVC_SPS);
+	sps = cedrus_find_control_data(ctx, V4L2_CID_STATELESS_HEVC_SPS);
 
 	/* The 10-bitHEVC decoder needs extra size on the output buffer. */
 	extended = ctx->src_fmt.pixelformat == V4L2_PIX_FMT_HEVC_SLICE &&
