@@ -941,7 +941,7 @@ rollback:
 	return err;
 }
 
-static void sunxi_pwm_get_state(struct pwm_chip *chip, struct pwm_device *pwm,
+static int sunxi_pwm_get_state(struct pwm_chip *chip, struct pwm_device *pwm,
 				struct pwm_state *state)
 {
 	struct sunxi_pwm_chip *pc = to_sunxi_pwm_chip(chip);
@@ -951,6 +951,8 @@ static void sunxi_pwm_get_state(struct pwm_chip *chip, struct pwm_device *pwm,
 	state->duty_cycle = 0;
 	sunxi_pwm_get_polarity(chip, pwm, &state->polarity);
 	state->enabled = sunxi_pwm_enabled(chip, pwm);
+
+	return 0;
 }
 
 static struct pwm_ops sunxi_pwm_ops = {
