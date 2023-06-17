@@ -58,8 +58,7 @@ static const struct regmap_irq ac200_regmap_irqs[] = {
 static const struct regmap_irq_chip ac200_regmap_irq_chip = {
 	.name			= "ac200_irq_chip",
 	.status_base		= AC200_SYS_IRQ_STATUS,
-	.mask_base		= AC200_SYS_IRQ_ENABLE,
-	.mask_invert		= true,
+	.unmask_base		= AC200_SYS_IRQ_ENABLE,
 	.irqs			= ac200_regmap_irqs,
 	.num_irqs		= ARRAY_SIZE(ac200_regmap_irqs),
 	.num_regs		= 1,
@@ -82,8 +81,7 @@ static const struct mfd_cell ac200_cells[] = {
 	},
 };
 
-static int ac200_i2c_probe(struct i2c_client *i2c,
-			   const struct i2c_device_id *id)
+static int ac200_i2c_probe(struct i2c_client *i2c)
 {
 	struct device *dev = &i2c->dev;
 	struct ac200_dev *ac200;
