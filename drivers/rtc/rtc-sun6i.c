@@ -394,7 +394,6 @@ static const struct sun6i_rtc_clk_data sun50i_h616_rtc_data = {
 	.fixed_prescaler = 32,
 	.has_prescaler = 1,
 	.has_out_clk = 1,
-	.export_iosc = 1,
 	.no_ext_losc = 1,
 };
 
