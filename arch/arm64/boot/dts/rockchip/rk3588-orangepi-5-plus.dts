@@ -238,6 +238,13 @@
 		};
 	};
 
+	rfkill-bt {
+		compatible = "rfkill-gpio";
+		label = "rfkill-m2-bt";
+		radio-type = "bluetooth";
+		shutdown-gpios = <&gpio0 RK_PC5 GPIO_ACTIVE_HIGH>;
+	};
+
 	sound {
 		hp_detect: hp-detect {
 			rockchip,pins = <1 RK_PD3 RK_FUNC_GPIO &pcfg_pull_none>;
