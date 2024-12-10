@@ -93,7 +93,7 @@
 
 		led_green_pwm: led-2 {
 			color = <LED_COLOR_ID_GREEN>;
-			function = LED_FUNCTION_INDICATOR;
+			function = LED_FUNCTION_HEARTBEAT;
 			function-enumerator = <2>;
 			max-brightness = <255>;
 		};
